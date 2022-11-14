@@ -1,0 +1,782 @@
+---
+title: 'A Study on Female Participation in Workforce in World'
+output:
+  pdf_document: default
+  html_notebook: default
+font: 10pt
+author: "Sonal G., Sushma Y., Shamima H."
+date: "13 August, 2022"
+---
+
+# Introduction
+
+Half of the world's population roughly comprises of women but when compared to a country’s total workforce the male and female workers percentage is rarely similar. If you look at the developing and underdeveloped countries, it’s even more prominent. Insufficient access to education, religious superstitions, lack of adequate infrastructures are some of the reasons responsible for this discrepancy, also it goes way beyond these.  The total labor force has been considered to show the effects of multiple socioeconomic factors on the women participation in the total workforce ad percentage of female employment. The relationship between these factors can be analyzed using multiple linear regression model.
+
+# Problem 
+Our original data comes from World Bank database where they have a collection of development indicators to estimate various socio-economic factors for all nations in the world. The data was collected using the Data Bank online resource which allows users to form custom time-series data sets based on chosen filters like countries, years and development indicators. We gathered data for each of the 11 development indicators (including the employed women percentage and related predictor variables) across 217 countries for the most recent year, 2019. After performing data preprocessing like removing missing values and labeling our indicators to more simple variable names .etc , we get our final data having 187 data points (countries). There is one response variable which is the percentage of the employed women explanatory variables of predictors. Brief descriptions of these variables are given below.
+
+**1. PerFemEmploy (Employment to population ratio (%) of women who are of age 15 or older.)** Employment to population ratio is the proportion of a country's population that is employed. Employment is defined as persons of working age who, during a short reference period, were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period (i.e. who worked in a job for at least one hour) or not at work due to temporary absence from a job, or to working-time arrangements. Ages 15 and older are generally considered the working-age population.
+
+**2. FertilityRate (Fertility rate (birth per women).)** Total fertility rate represents the number of children that would be born to a woman if she were to live to the end of her childbearing years and bear children in accordance with age-specific fertility rates of the specified year.
+
+**3. RatioMaletoFemale (Ratio of female to male labor force participation rate.)** Labor force participation rate is the proportion of the population ages 15 and older that is economically active: all people who supply labor for the production of goods and services during a specified period. Ratio of female to male labor force participation rate is calculated by dividing female labor force participation rate by male labor force participation rate and multiplying by 100.
+
+**4. PerFemEmployers Employers, female (% of female employment).** Employers are those workers who, working on their own account or with one or a few partners, hold the type of jobs defined as a "self-employment jobs" i.e. jobs where the remuneration is directly dependent upon the profits derived from the goods and services produced), and, in this capacity, have engaged, on a continuous basis, one or more persons to work for them as employee(s).
+
+**Agriculture (Employment in agriculture, female (% of female employment).)** Employment is defined as persons of working age who were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period or not at work due to temporary absence from a job, or to working-time arrangement. The agriculture sector consists of activities in agriculture, hunting, forestry and fishing, in accordance with division 1 (ISIC 2) or categories A-B (ISIC 3) or category A (ISIC 4).
+
+**5. Industry (Employment in industry, female (% of female employment).)** The industry sector consists of mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water), in accordance with divisions 2-5 (ISIC 2) or categories C-F (ISIC 3) or categories B-F (ISIC 4).
+
+**6. Services (Employment in services, female (% of female employment).)** The services sector consists of wholesale and retail trade and restaurants and hotels; transport, storage, and communications; financing, insurance, real estate, and business services; and community, social, and personal services, in accordance with divisions 6-9 (ISIC 2) or categories G-Q (ISIC 3) or categories G-U (ISIC 4).
+
+**7. Wage.Salaried (Wage and salaried workers, female (% of female employment).)** Wage and salaried workers (employees) are those workers who hold the type of jobs defined as "paid employment jobs," where the incumbents hold explicit (written or oral) or implicit employment contracts that give them a basic remuneration that is not directly dependent upon the revenue of the unit for which they work.
+
+**8. ContrFamWorkers (Contributing family workers, female (% of female employment).)** Contributing family workers are those workers who hold "self-employment jobs" as own-account workers in a market-oriented establishment operated by a related person living in the same household.
+
+**9. OwnAccount (Own-account female workers (% of employment).)** Own-account workers are workers who, working on their own account or with one or more partners, hold the types of jobs defined as "self-employment jobs" and have not engaged on a continuous basis any employees to work for them. Own account workers are a subcategory of "self-employed".
+
+**10. Vulnerable (Vulnerable employment, female (% of female employment).)** Vulnerable employment is contributing family workers and own-account workers as a percentage of total employment.
+
+# Purpose
+We can apply Linear Regression Model and other statistical methods on this dataset to analyze if there are any viable relationship between the response of the variables and the predictor.
+
+# Methodology
+
+## A. Data Preprocessing
+```{r,include=FALSE}
+##Import libraries here
+library(tidyverse)
+library(dplyr)
+library(car)
+library(corrplot)
+library(grid)
+library(gridExtra)
+library(repr)
+library(olsrr)
+library(broom)
+library(SciViews)
+library(MASS)
+library(MPV)
+library(cvTools)
+library("reshape2") 
+library(maps) 
+```
+
+
+```{r,include=FALSE}
+##Import data
+df<- read_csv("data/93a9675f-63e9-4a5c-84ae-389e7022a50d_Data.csv",show_col_types = FALSE)
+attach(df)
+```
+```{r,include=FALSE}
+##Untidy Data
+head(df)
+```
+
+```{r,include=FALSE}
+## Adding ids as primary key
+df <- df %>% mutate(id=row_number()) %>% dplyr::select(id,everything())
+```
+
+
+```{r,include=FALSE}
+## Store Indicators. Drop from df.
+IndicatorNames = data.frame('Indicator_Name' =unique(`Series Name`),'Indicator_Var'=unique(`Series Code`) ) 
+```
+
+### A.1. Labelling Variable Names
+We converted the indicator names to more simple and appropriate variable names. 
+
+```{r,include=FALSE}
+##Simplifying the indicator names here
+old_val= unique(`Series Code`)
+new_val= c('Wage.Salaried', 'Vulnerable', 'OwnAccount',  'RatioMaletoFemale',  'FertilityRate','PerFemEmploy','Services', 'Industry','Agriculture','PerFemEmployers', 'ContrFamWorkers') 
+
+data.frame("Indicator Names" = unique(`Series Name`),"Variable Names"=new_val)
+
+df <- df %>% 
+  mutate(Indicators=plyr::mapvalues(`Series Code`, from = old_val, to = new_val)) %>%
+  dplyr::select(c(-`Series Name`,-`Series Code`))
+
+
+```
+```{r,include=FALSE}
+## Unique columns for Indicators for each Country
+coalesce_by_column <- function(df) {
+  return(dplyr::coalesce(!!! as.list(df)))
+}
+
+df<- df  %>%  
+    spread(key=`Indicators`, value=`2019 [YR2019]`) %>% 
+    group_by(`Country Code`) %>%
+    summarise_all(coalesce_by_column) %>% 
+    dplyr::select(id,`Country Code`,`Country Name`,'PerFemEmploy',everything())
+
+
+```
+```{r,include=FALSE}
+df[4:14] <- lapply(df[4:14], FUN = function(y){as.numeric(y)})   ##Convert datatype to numeric
+```
+
+### A.2. Missing Values
+```{r,echo=FALSE}
+## Check for nas
+colSums(is.na(df))
+```
+
+We found some missing value for 30 countries. Since there was no data for these countries, we chose to omit them from our analysis. So, instead 217 data points, we'll be dealing with 187 countries as observations.
+
+```{r,include=FALSE}
+df<- na.omit(df)  #Removing NA values
+```
+
+
+```{r,include=FALSE}
+## Store Country Names. Drop from df.
+CountryNames = unique(df['Country Name'])$'Country Name'
+```
+
+```{r,include=FALSE}
+## Final Data set
+head(df)                        ## 187 rows x 13 columns
+```
+
+## A.3. Outlier Analysis
+```{r,echo=FALSE}
+suppressMessages(df_main <- melt(df[4:14]))
+levels(df_main$variable) <- names(df[4:14])
+ggplot(df_main, aes(variable,value)) + geom_boxplot() + coord_flip()
+```
+
+Outliers were detected and analyzed using the Outlier Box plots. From the outliers box plot we inferred that the data consists of many outliers for the target variable. However, the outliers for variable corresponded to outliers RatioMaletoFemale, PerFemEmployers, Industry, FertilityRate, ContrFamWorkers, Agriculture, and PerFemEmploy. Hence, We conclude that these outliers are legitimate outliers and we decided to retain to retain them in the data.
+
+## B. Exploratory Data Analysis
+
+Let's see if the data meets the first assumption for regression analysis i.e. linear relationship of response with at least one of the regressors. The exploratory analysis will help to reveal relationship between the response and the regressor variables. The obtained results can help us narrow down our search for potential predictors that have significant effect on determining the percentage of employed women for a nation.
+
+### B.1. Correlation Visualization
+We can see correlations between the variables by visualizing though correlation plot.
+
+```{r,echo=FALSE}
+##Visualize Correlations 
+corrplot(cor(df[, 4:14]), type = "upper", order = "hclust", 
+         tl.col = "black", tl.srt = 45)
+```
+
+Our response *PerFemEmploy* is highly positively correlated with independent variable *RatioMaletoFemale*. Some independent variables seem to be highly correlated (for eg. *OwnAccount* is highly correlated with *Vulnerable* (+),*Agriculture* (+), *Services* (-) and *Wage.Salaried* (-) .etc). We need to have a closer look at these variables to determine if multicollinearity is present in data models.
+
+```{r,include=FALSE}
+par(mfrow = c(2, 2))
+#Histograms
+plot_list<- list()
+for(col in names(df[4:14])){
+  hist(df[[col]],main=paste("Histogram for",col),xlab=col)
+  #print(g)
+}
+
+
+```
+
+
+
+```{r,include=FALSE}
+par(mfrow = c(2,3))
+
+# scatter plot using df
+s1 <- ggplot(data = df, aes(x = Agriculture, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="Agriculture") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s2 <- ggplot(data = df, aes(x = ContrFamWorkers, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="ContrFamWorkers") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s3 <- ggplot(data = df, aes(x =  FertilityRate, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x=" FertilityRate") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s4 <- ggplot(data = df, aes(x = Industry, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="Industry") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s5 <- ggplot(data = df, aes(x = OwnAccount, y = OwnAccount)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="OwnAccount") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s6 <- ggplot(data = df, aes(x = PerFemEmployers, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="PerFemEmployers") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s7 <- ggplot(data = df, aes(x = RatioMaletoFemale, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="RatioMaletoFemale") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s8 <- ggplot(data = df, aes(x = Services, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="Services") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s9 <- ggplot(data = df, aes(x = Vulnerable, y = PerFemEmploy)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="Vulnerable") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+s10 <- ggplot(data = df, aes(x = Agriculture, y = Wage.Salaried)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(y= " PerFemEmploy", 
+       x="Wage.Salaried") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+##Arrange the Plots
+suppressMessages(grid.arrange(s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,nrow=2))
+```
+### B.2. Geographic Analysis
+
+```{r,echo=FALSE}
+df_c=df
+colnames(df_c)[3] <- "region"
+
+world <- map_data("world") %>% 
+  filter(! long > 180)
+
+world["region"][world["region"] == "USA"] <- "United States"
+world["region"][world["region"] == "Russia"] <- "Russian Federation"
+world["region"][world["region"] == "Brunei"] <- "Brunei Darussalam"
+world["region"][world["region"] == "Egypt"] <- "Egypt, Arab Rep."
+world["region"][world["region"] == "UK"] <- "United Kingdom"
+world["region"][world["region"] == "South Korea"] <- "Korea, Rep."
+world["region"][world["region"] == "Laos"]<- "Lao PDR"
+world["region"][world["region"] == "North Korea"] <- "Korea, Dem. People's Rep."
+world["region"][world["region"] == "Slovakia"] <- "Slovak Republic"
+world["region"][world["region"] == "Syria"] <- "Syrian Arab Republic"
+world["region"][world["region"] == "Saint Vincent"] <- "St. Vincent and the Grenadines"
+world["region"][world["region"] == "Grenadines"] <- "St. Vincent and the Grenadines"
+world["region"][world["region"] == "Venezuela"] <- "Venezuela, RB"
+world['region'][which(world$region == "Virgin Islands"  & world$subregion == "US"),] <- "Virgin Islands (U.S.)"
+world["region"][world["region"] == "Yemen"] <- "Yemen, Rep."
+world["region"][world["region"] == "Bahamas"] <- "Bahamas, The"
+world["region"][world["region"] == "Democratic Republic of the Congo"] <- "Congo, Dem. Rep."
+world["region"][world["region"] == "Republic of Congo"] <- "Congo, Rep."
+world["region"][world["region"] == "Cape Verde"] <- "Cabo Verde"
+world["region"][world["region"] == "Gambia"] <- "Gambia, The"
+world["region"][world["region"] == "Kyrgyzstan"] <- "Kyrgyz Republic"
+world["region"][world["region"] == "Iran"] <- "Iran, Islamic Rep."
+world["region"][world["region"] == "Turkey"] <- "Turkiye"
+merged_df <- world[world$region %in% df_c$region, ]
+merged_df$PerFemEmploy <- df_c$PerFemEmploy[match(merged_df$region, df_c$region)]
+
+suppressWarnings(
+ggplot() +
+    geom_map(data = world, map = world,
+                  aes(x = long, y = lat, group = group, map_id=region,
+                  size=0.01) )+ 
+    geom_map(data =  merged_df, map=world,
+                  aes(fill=PerFemEmploy, map_id=region),
+                   size=0.001,color="gray70") +
+    coord_map("rectangular", lat0=0, xlim=c(-180,180), ylim=c(-100, 100)) +
+    scale_fill_continuous(low="lightpink", high="deeppink2", guide="colorbar") +
+    scale_y_continuous(breaks=c()) +
+    scale_x_continuous(breaks=c()) +
+    labs(fill="PerFemEmploy", title="Percentage of Employed Women Across Countries", x="", y="") +
+    theme(
+  panel.background = element_rect(fill = "gray90", colour = "gray60",
+                                size = 2, linetype = "solid"),
+  panel.grid.major = element_line(size = 0.75, linetype = 'solid',
+                                colour = "white"), 
+  panel.grid.minor = element_line(size = 0.5, linetype = 'solid',
+                                colour = "white")
+  ))
+```
+
+The above world map shows the percentage of employed women across different countries in the world.By looking at the above graph, majority of the countries have more than 60% or more women employed whereas a very countries lie less than 40% of the women employed.
+
+## C. Regression and Statistical Analysis
+
+### C.1. Full Model
+
+First, we prepare a linear model using all data in the dataset. This includes 1 response variable *PerFemEmploy* and 10 explanatory variables. A model summary is shown below:
+
+```{r,echo=FALSE}
+## Initial Full Model with all 10 predictor variables
+full.fit<- lm(PerFemEmploy~.,df[4:14])
+summary.aov(full.fit)    
+```
+
+- The predictors *Agriculture* , *FertilityRate* , *Industry*, *OwnAccount*, *RatioMaletoFemale* are significant for this model (p-values less than 0.05 significance level).
+
+```{r,include=FALSE}
+summary.lm(full.fit)
+```
+
+- For our full model, we get p-value of 2.2e-16, which is very less than $\alpha$. We reject the null hypothesis and say this regression model is significant to be considered. 
+- The $R^2$ (0.80) and $R^2_{Adj}$ (0.79) values are good enough. But these high values may also be due to more variables used in the model. We need to simplify the model by removing redundant terms.
+- The coefficient estimates are high and we might need to perform centering of the regressors.
+
+### C.2. Possible Transformations
+```{r,echo=FALSE}
+df_new<- df[4:14]
+bc <- boxcox(lm(PerFemEmploy~.,df_new))
+lambda <- bc$x[which.max(bc$y)]
+paste("lambda =",round(lambda,2))                                          ## Try sqrt(y+c) transformation
+
+#bc$x[bc$y > max(bc$y) - 1/2 * qchisq(.95,1)]    ## Does not contain 1
+
+## The Box-Cox transformation suggests that we transform our response before commencing. But let's check our model assumptions before so we can see if it meets constant variance assumption.
+```
+
+The Box-Cox transformation suggests that we transform our response before commencing. But let's check our model assumptions before so we can see if it meets constant variance assumption.
+
+### C.3. Diagnostics Residual Analysis
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+##LINEARITY
+## Residuals Vs Fit Plot
+plot(full.fit,1)
+## Interpretation: Red line close to Horizontal. Linearity is present.
+
+#INDEPENDENCE
+lmtest::dwtest(full.fit) 
+##Interpretation : Error terms are independent.
+
+##NORMALITY
+## Normality plot
+plot(full.fit,2)
+shapiro.test(full.fit$residuals)  
+##Interpretation: The data is normal.
+##
+
+##EQUAL VARIANCE
+##Scale-Location Plot
+plot(full.fit, 3)
+lmtest::bptest(full.fit)   ##Retain null. Constant Variance
+##Points Equally Spread Out. But red fitted line is not horizontal (seems to increase). 
+##No need to transform y.
+
+## Outliers and Leverages
+plot(full.fit, 5)
+
+## Interpretation: Points #15,#73,#89 are extreme values with standardized residuals beyond absolute value of 2. No points are exceed 3 standard deviations, which is good. There are leverage points i.e. some points have leverage statistic beyond 2(p + 1)/n = 22/187 = 0.117. 
+
+#influence.measures(model)  ##Possible Influential Points 1,9,13,65,73,89,104,126,129,133,141,152,154,160,168,183
+
+ols_plot_resid_lev(full.fit)
+plot(full.fit,4)
+## 89,73,154 are leverage points
+## No influential points as per Cook's distance
+
+##Variance Inflation Factors
+barplot(vif(full.fit), main = "VIF Values", horiz = TRUE, col = "steelblue",las=1) #Very high multicollinearity
+```
+
+After fitting full we check if our full model meets the four regression assumptions:
+
+1. We see the *Residuals Vs Fitted Plot* for seeing whether there is a linear relationship between the response and predictors. As the red fitted line is approximately close to the horizontal (residual=0) line, we conclude our model meets Linearity Assumption.
+
+2. We perform *Durbin-Watson Test* to check is error terms are independent or not. We get significant test statistic to prove that the error terms are independent.
+
+3. To check if our data follows normal distribution, we check the *Normality Q-Q Plot*. We conclude error terms are normal.
+
+4. We see the *Scale-Location Plot* and perform *Breusch-Pagan test* to check if model meets the constant variance assumption. As the error terms are randomly distributed and show no definite pattern, we conclude the error terms have equal variance. We don't need to transform our response now.
+
+5. We check for outliers, leverages and influential points. We find some leverages and outliers but decide not to remove them for further analysis.
+
+6. We found very high multicollinearity for our full model. It was mostly due to variables *OwnAccount* and *Wage.Salaried*.
+
+```{r,include=FALSE}
+plot(lm(PerFemEmploy~.,df[4:14]),5)
+plot(lm(PerFemEmploy~.,df[c(-89,-73,-154),4:14]),5)
+#Not very significant impact after removing leverage points.
+##Decision: Do not discard points from regression analysis.
+```
+
+
+## C.3. Variable Selection
+
+We perform variable selection using various regression methods such as best subsets, forward regression, backward regression and step wise regression. Most of our models suggested by methods using forward, backward and step wise regression methods were also found in our best subsets table. We check for model adequacy in terms of regression assumptions, multicollinearity, PRESS values, predictive $R^2$ value and also check if a model's fit can be improved by adding non-linear terms. If a model doesn't meet constant-variance assumption we used Box-Cox transformation on response to stabilize the variance The results for our best subsets model is shown below:
+
+```{r,include=FALSE}
+#### Using Best Subsets Regression Method
+full.fit<- lm(PerFemEmploy~.,df[4:14])
+best.mods<-ols_step_best_subset(full.fit)
+```
+```{r,echo=FALSE}
+best.mods
+```
+```{r,include=FALSE}
+plot(best.mods)
+```
+
+
+
+```{r,include=FALSE}
+#### Using Forward Regression Method
+fwd.fit.p<- ols_step_forward_p(full.fit,0.05)
+fwd.fit.p
+```
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Obtained from Fwd Regression using p-value
+m0<- lm(PerFemEmploy~RatioMaletoFemale+ContrFamWorkers,df[4:14])
+## Also Present in our Best Subsets Models Table
+
+plot(m0,2)            #Normality
+ols_test_normality(m0) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m0,1)      ##Residuals Vs Fitted Plot
+lmtest::bptest(m0) ## Equal Variances
+
+vif(m0)     #No multicollinearity
+
+PRESS(m0)  ##PRESS statistic
+
+sst<- sum(anova(m0)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m0)/(sst))    ##Predictive R-squared = 78.7%
+
+car::avPlots(m0)      ##Check if model can be linearized by adding non-linear terms
+```
+
+
+```{r,include=FALSE}
+##Forward Regression Method using AIC
+fwd.fit.aic <- ols_step_forward_aic(full.fit)
+fwd.fit.aic 
+
+plot(fwd.fit.aic )
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Obtained from Fwd Regression using AIC
+m1<- lm(PerFemEmploy~RatioMaletoFemale+FertilityRate+ContrFamWorkers+PerFemEmployers+Industry,df[4:14])
+  
+plot(m1,2)            #Normality
+ols_test_normality(m1) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m1,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m1) ## Equal Variances
+
+vif(m1)     #No multicollinearity
+
+PRESS(m1)  ##PRESS statistic
+
+sst<- sum(anova(m1)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m1)/(sst))    ##Predictive R-squared = 78.91%
+
+car::avPlots(m1)      ##Check if model can be linearized by adding non-linear terms
+```
+
+
+```{r,include=FALSE}
+#### Using Backwards Regression Method
+##Using pvalue 
+bwd.fit.p <- ols_step_backward_p(full.fit,0.05)
+bwd.fit.p  #Same as m0
+```
+```{r,include=FALSE}
+## Using AIC
+bwd.fit.aic<- ols_step_backward_aic(full.fit) 
+bwd.fit.aic
+
+plot(bwd.fit.aic)      
+```
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Present in our Best Subsets Models Table
+m2<- lm(PerFemEmploy~RatioMaletoFemale+FertilityRate+ContrFamWorkers+PerFemEmployers+Industry+Agriculture+Services,df[4:14])
+  
+plot(m2,2)            #Normality
+ols_test_normality(m2) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m2,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m2) ## Unequal Variances
+
+vif(m2)     #Very High multicollinearity
+
+PRESS(m2)  ##PRESS statistic
+
+sst<- sum(anova(m2)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m2)/(sst))    ##Predictive R-squared = 78.6%
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+##Box cox transformation
+df_new<- df[4:14]
+bc <- boxcox(lm(PerFemEmploy~RatioMaletoFemale+FertilityRate+ContrFamWorkers+PerFemEmployers+Industry+Agriculture+Services,df_new))
+lambda <- bc$x[which.max(bc$y)]
+lambda                                          
+
+bc$x[bc$y > max(bc$y) - 1/2 * qchisq(.95,1)]    
+
+df[['bc_PerFemEmploy_1']] = (df[['PerFemEmploy']]^lambda-1)/lambda
+
+## Modified m2
+m2<- lm(bc_PerFemEmploy_1~RatioMaletoFemale+FertilityRate+ContrFamWorkers+PerFemEmployers+Industry+Agriculture+Services,tail(df, -4))
+
+#Normality 
+plot(m2,2)            
+ols_test_normality(m2) #Reject H0 at 5% significance level for 3 tests.
+
+##Constant Variance Assumption
+plot(m2,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m2) ## Equal Variances achieved
+
+vif(m2)     #Very High multicollinearity
+
+PRESS(m2)  ##PRESS statistic
+
+sst<- sum(anova(m2)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m2)/(sst))    ##Predictive R-squared = 80.15%
+
+car::avPlots(m2)      ##Check if model can be linearized by adding non-linear terms
+```
+
+ 
+```{r,include=FALSE}
+#### Using Step Wise Regression Method
+## p-value approach
+step.fit.p<- ols_step_both_p(full.fit,0.05)
+step.fit.p ##Same as m0
+```
+```{r,echo=FALSE}
+step.fit.aic<- ols_step_both_p(full.fit)
+step.fit.aic      ##Same as m0
+```
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+
+## Other models Present in our Best Subsets Models Table
+m3<- lm(PerFemEmploy~RatioMaletoFemale, df[4:14])
+  
+plot(m3,2)            #Normality
+ols_test_normality(m3) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m3,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m3) ## Unequal Variances
+
+#vif(m3)     #No multicollinearity
+
+PRESS(m3)  ##PRESS statistic
+
+sst<- sum(anova(m3)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m3)/(sst))    ##Predictive R-squared = 75.29%
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+##Box cox transformation
+df_new<- df[4:14]
+bc <- boxcox(lm((PerFemEmploy)~RatioMaletoFemale,df_new))
+lambda <- bc$x[which.max(bc$y)]
+lambda
+
+df[['bc_PerFemEmploy_2']] = (df[['PerFemEmploy']]^lambda-1)/lambda
+
+## Modified m3
+m3<- lm(bc_PerFemEmploy_2 ~ RatioMaletoFemale,tail(df, -4))
+
+##Normality
+plot(m3,2)
+ols_test_normality(m3)     #Reject H0 at 5% alpha level according to 3 tests
+
+## Constant Variance
+plot(m3,1)
+lmtest::bptest(m3)        #Equal Variance achieved
+
+sst<- sum(anova(m3)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m3)/(sst))    ##Predictive R-squared = 78.81%
+
+avPlots(m3)                    #Check if model can be linearized by adding non linear terms
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Other models Present in our Best Subsets Models Table
+m4<- lm(PerFemEmploy~ ContrFamWorkers+PerFemEmployers+RatioMaletoFemale, df[4:14])
+  
+plot(m4,2)            #Normality
+ols_test_normality(m4) #Reject H0 at 5% significance level for 2 tests.
+
+plot(m4,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m4) ## Equal Variance
+
+vif(m4)     #No multicollinearity 
+PRESS(m4)  ##PRESS statistic
+
+sst<- sum(anova(m4)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m4)/(sst))    ##Predictive R-squared = 78.78%
+
+avPlots(m4)                    #Check if model can be linearized by adding non linear terms
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Other models Present in our Best Subsets Models Table
+m5<- lm(PerFemEmploy~ Agriculture+ContrFamWorkers+Industry+PerFemEmployers+RatioMaletoFemale+Services, df[4:14])
+plot(m5,2)            #Normality
+ols_test_normality(m5) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m5,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m5) ## Unequal Variances
+vif(m5)     #High multicollinearity
+
+PRESS(m5)  ##Low PRESS statistic
+
+sst<- sum(anova(m5)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m5)/(sst))    ##Predictive R-squared = 78.54%
+
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+##Box cox transformation
+df_new<- df[4:14]
+bc <- boxcox(lm((PerFemEmploy)~Agriculture+ContrFamWorkers+Industry+PerFemEmployers+RatioMaletoFemale+Services,df_new))
+lambda <- bc$x[which.max(bc$y)]
+lambda
+
+df[['bc_PerFemEmploy_3']] = (df[['PerFemEmploy']]^lambda-1)/lambda
+
+##Modified m5
+m5<- lm(bc_PerFemEmploy_3 ~Agriculture+ContrFamWorkers+Industry+PerFemEmployers+RatioMaletoFemale+Services,tail(df, -4))
+
+##Normality
+plot(m5,2)
+ols_test_normality(m5)     #Reject H0 at 5% alpha level according to 3 tests
+
+## Constant Variance
+plot(m5,1)
+lmtest::bptest(m5)        #Equal Variance achieved
+
+vif(m5)                   #High multicollinearity
+
+sst<- sum(anova(m5)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m5)/(sst))    ##Predictive R-squared = 79.8%
+
+avPlots(m5)                    #Check if model can be linearized by adding non linear terms
+```
+
+```{r,include=FALSE}
+par(mfrow=c(2,2))
+## Other models Present in our Best Subsets Models Table
+m6<- lm(PerFemEmploy~ ContrFamWorkers+ FertilityRate+ PerFemEmployers+ RatioMaletoFemale, df[4:14])
+plot(m6,2)            #Normality
+ols_test_normality(m6) #Reject H0 at 5% significance level for 3 tests.
+
+plot(m6,c(1))      ##Residuals Vs Fitted Plot
+lmtest::bptest(m6) ## Equal Variances
+vif(m6)     #No multicollinearity
+
+PRESS(m6)  ##PRESS statistic
+
+sst<- sum(anova(m6)$'Sum Sq')
+(pred.r.squared <- 1-PRESS(m6)/(sst))    ##Predictive R-squared = 78.88%
+```
+
+We generate 7 models using results of variable selection methods. All our models follow regression assumptions. The only criteria left to pick the best performing model is the predictive $R^2$ value, complexity of the model (like whether the response was transformed and the no. of predictors used) and multicollinearity was present in the model. We can summarize the results of variable selection models in the table below:
+
+```{r,echo=FALSE}
+tribble(
+  ~`Model` , ~`predrsq (in %)` , ~`multicollinearity`, ~`boxcox(response)`,~`n_predictors`,
+  "m0",   78.7, "No", "No",2,
+  "m1", 78.91, "No", "No",5,
+  "m2",  80.15, "Very High", "Yes",7,
+  "m3", 78.81, "No", "Yes",1,
+  "m4", 78.78, "No", "No",3,
+  "m5",  79.8, "High", "Yes",6,
+  "m6", 78.88, "No", "No",4
+)
+```
+
+Model *m2* had the highest predictive $R^2$ value (80.15) but had very high multicollinearity. If we discard the models where multicollinearity was found (m2 & m5), we have to see model good in terms of complexity and prediction power. Though *m3* is also a good choice, it has very simple fit (simple linear regression model with 1 predictor). We can validate our results by performing cross-validation on models *m0*, *m1*, *m4* and *m5*.
+
+### C.4. Cross-Validation
+We create 10 folds divided in 1:1 ratio for training and validation sets from our data. Each of the 4 models are fit on these folds using cost = rtmspse . 
+
+```{r,echo=FALSE}
+##Perform cross-validation
+folds<- cvFolds(nrow(df), K=2, R=10)
+
+cvfit0<- cvLm(m0,cost=rtmspe,folds=folds)
+cvfit1<- cvLm(m1,cost=rtmspe,folds=folds)
+#cvfit2<- cvLm(m2,cost=rtmspe,folds=folds)
+#cvfit3<- cvLm(m3,cost=rtmspe,folds=folds)
+cvfit4<- cvLm(m4,cost=rtmspe,folds=folds)
+#cvfit5<- cvLm(m5,cost=rtmspe,folds=folds)
+cvfit6<- cvLm(m6,cost=rtmspe,folds=folds)
+
+cvFits<- cvSelect(cvfit0,cvfit1,cvfit4,cvfit6)
+cvFits
+```
+
+From the above CV fit summary, we find that *Fit 1* or Model *m0* performs the best on 10-fold cross validation with the least CV score . Model *m0* is good both in terms of predictive power (Pred. $R^2$ = 78.70% ) and model complexity (2 predictors used with no transformation on the response). Therefore, we can deduce *m0* as our final model in the next section. 
+
+## Results
+
+Summary of our final model:
+
+```{r,include=FALSE}
+model.fit<- lm(PerFemEmploy~RatioMaletoFemale+ContrFamWorkers,df[4:14])
+summary.aov(model.fit)
+```
+
+```{r,echo=FALSE}
+summary.lm(model.fit)
+
+```
+
+**Regression Equation for Estimated Model**
+
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 +\epsilon$$
+$$\hat{PerFemEmploy}= -6.87 + 0.72 RatioMaletoFemale + 0.20 ContrFamWorkers$$
+
+## Discussion
+
+- The intercept is -6.87. i.e. average % of female employed has been negatively impacted in that year.
+
+- Our response is positively correlated with *RatioMaletoFemale*. Unit increase in *RatioMaletoFemale* increases our response by 0.72 units, keeping all other predictors constant. We can interpret it as a healthy ratio of Male:Female in a country promotes female employment opportunities in a country.
+ 
+- Our response is positively correlated with *ContrFamWorkers*. Unit increase in *ContrFamWorkers* increases our response by 0.20 units, keeping all other predictors constant. The more *ContrFamWorkers* in a household increases the chances of females being employed.
+
+# Conclusion 
+From Exploratory Data Analysis and Regression and Statistical Analysis, we identified the most important and statistical significant attributes affecting the percentage of female employed in 2019.
+The variables RatioMaletoFemale and ContrFamWorkers had a significant effect on our response and account most part of the variance explained through our model. We are surprised that factors like Industry and FertilityRate have a low impact on the response. 
+
+We are confident that our model deals with multicollinearity and has low bias. We successfully reduced 10 variables into 2 significant ones.
+
+# References 
+
+1. https://genderdata.worldbank.org/data-stories/flfp-data-story/#:~:text=The%20global%20labor%20force%20participation,business%20expansion%20or%20career%20progression.
+
+2. https://ourworldindata.org/female-labor-supply
+
+3. https://www.kaggle.com/datasets/mdmuhtasimbillah/female-employment-vs-socioeconimic-factors
+
+4. https://databank.worldbank.org/source/world-development-indicators/Type/TABLE/preview/on#
