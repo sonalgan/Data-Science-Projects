@@ -1,0 +1,7 @@
+# Prospective Bank Customers Prediction using Machine Learning 
+
+This project uses the Bank Marketing Data set from the UCI Machine Learning Repository (https://archive.ics.uci.edu/ml/datasets/bank+marketing). It has 21
+variables, where the target variable is 'y' i.e. has the client subscribed a term deposit? (binary: 'yes','no').
+
+AIM: Use various Machine Learning (Support Vector Machine) and Deep Learning (Deep Neural Network) algorithms to predict if a customer is likely to subscribe 
+to a term deposit in the future.
