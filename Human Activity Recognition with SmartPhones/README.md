@@ -20,13 +20,16 @@ The project involves data cleaning, exploratory data analysis, feature engineeri
 ## Installation
 
 - Clone the repository:
-!git clone https://github.com/sonalgan/Data-Science-Projects.git
 
-- Navigate to the "Human Activity Recognition with SmartPhones" folder:
-!cd Data-Science-Projects/Human-Activity-Recognition-with-SmartPhones
+git clone https://github.com/sonalgan/Data-Science-Projects.git
+
+- Navigate to the "Human Activity Recognition with SmartPhones" folder
+
+cd Data-Science-Projects/Human-Activity-Recognition-with-SmartPhones
 
 - Install the required libraries:
-!pip install -r requirements.txt
+
+pip install -r requirements.txt
 
 
 ## Usage
