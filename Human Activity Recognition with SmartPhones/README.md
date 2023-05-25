@@ -4,68 +4,6 @@
 
 ## Description
 
-This repository contains the code and documentation for the Human Activity Recognition using SmartPhones project, part of the Data Science Projects repository. The project aims to develop a predictive model that accurately identifies human activities based on data collected from smartphone sensors.
-
-The project involves data cleaning, exploratory data analysis, feature engineering, and implementation of machine learning algorithms. Various conventional machine learning methods such as Decision Tree, K-Nearest Neighbors, and Random Forest are explored, optimized, and compared. Additionally, AutoML techniques are utilized to automate the model selection process.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Data](#data)
-- [Methods](#methods)
-- [Results](#results)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Installation
-
-- Clone the repository:
-Certainly! Here's an updated template for the README.md file, taking into account the folder structure and repository name:
-
-markdown
-
-# Human Activity Recognition with SmartPhones
-
-![Project Image](project_image.png) <!-- Include an image illustrating your project, if applicable -->
-
-## Description
-
-This repository contains the code and documentation for the Human Activity Recognition with SmartPhones project, part of the Data Science Projects repository. The project aims to develop a predictive model that accurately identifies human activities based on data collected from smartphone sensors.
-
-The project involves data cleaning, exploratory data analysis, feature engineering, and implementation of machine learning algorithms. Various conventional machine learning methods such as Decision Tree, K-Nearest Neighbors, and Random Forest are explored, optimized, and compared. Additionally, AutoML techniques are utilized to automate the model selection process.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Data](#data)
-- [Methods](#methods)
-- [Results](#results)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Installation
-
-- Clone the repository:
-git clone https://github.com/sonalgan/Data-Science-Projects.git
-
-
-- Navigate to the "Human Activity Recognition using SmartPhones" folder:
-cd Data-Science-Projects/Human-Activity-Recognition-with-SmartPhones
-
-
-- Install the required libraries:
-Certainly! Here's an updated template for the README.md file, taking into account the folder structure and repository name:
-
-markdown
-
-# Human Activity Recognition with SmartPhones
-
-![Project Image](project_image.png) <!-- Include an image illustrating your project, if applicable -->
-
-## Description
-
 This repository contains the code and documentation for the Human Activity Recognition with SmartPhones project, part of the Data Science Projects repository. The project aims to develop a predictive model that accurately identifies human activities based on data collected from smartphone sensors.
 
 The project involves data cleaning, exploratory data analysis, feature engineering, and implementation of machine learning algorithms. Various conventional machine learning methods such as Decision Tree, K-Nearest Neighbors, and Random Forest are explored, optimized, and compared. Additionally, AutoML techniques are utilized to automate the model selection process.
@@ -120,7 +58,7 @@ pip install -r requirements.txt
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 
 
