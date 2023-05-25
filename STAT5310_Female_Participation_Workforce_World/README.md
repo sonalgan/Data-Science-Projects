@@ -1,3 +1,6 @@
+![project_image](https://github.com/sonalgan/Data-Science-Projects/assets/57640393/125de8a4-57a8-4956-9cd6-658054a0aa87)
+
+
 # Female Participation in Workforce in World - README
 
 This repository contains the project files for the "Female Participation in Workforce in World" project, which aimed to analyze the factors influencing female participation in the workforce worldwide using Multiple Linear Regression (MLR) implemented in R. The project was conducted as part of the STAT5310 course on Data Science.
