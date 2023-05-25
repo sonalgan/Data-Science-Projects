@@ -1,33 +1,42 @@
-# A Study on Female Participation in Workforce in World
+# Female Participation in Workforce in World - README
 
-## Introduction
+This repository contains the project files for the "Female Participation in Workforce in World" project, which aimed to analyze the factors influencing female participation in the workforce worldwide using Multiple Linear Regression (MLR) implemented in R. The project was conducted as part of the STAT5310 course on Data Science.
 
-Half of the world's population roughly comprises of women but when compared to a country’s total workforce the male and female workers percentage is rarely similar. If you look at the developing and underdeveloped countries, it’s even more prominent. Insufficient access to education, religious superstitions, lack of adequate infrastructures are some of the reasons responsible for this discrepancy, also it goes way beyond these.  The total labor force has been considered to show the effects of multiple socioeconomic factors on the women participation in the total workforce ad percentage of female employment. The relationship between these factors can be analyzed using multiple linear regression model.
+## Folder Structure
 
-## Problem 
-Our original data comes from World Bank database where they have a collection of development indicators to estimate various socio-economic factors for all nations in the world. The data was collected using the Data Bank online resource which allows users to form custom time-series data sets based on chosen filters like countries, years and development indicators. We gathered data for each of the 11 development indicators (including the employed women percentage and related predictor variables) across 217 countries for the most recent year, 2019. After performing data preprocessing like removing missing values and labeling our indicators to more simple variable names .etc , we get our final data having 187 data points (countries). There is one response variable which is the percentage of the employed women explanatory variables of predictors. Brief descriptions of these variables are given below.
+- `Data Science Projects`
+  - `STAT5310_Female_Participation_Workforce_World`
+    - `report.rmd`: The R Markdown file containing the code, analysis, and visualizations for the project.
+    - `final_project.pdf`: The final report summarizing the project findings and conclusions.
 
-**1. PerFemEmploy (Employment to population ratio (%) of women who are of age 15 or older.)** Employment to population ratio is the proportion of a country's population that is employed. Employment is defined as persons of working age who, during a short reference period, were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period (i.e. who worked in a job for at least one hour) or not at work due to temporary absence from a job, or to working-time arrangements. Ages 15 and older are generally considered the working-age population.
+## Project Description
 
-**2. FertilityRate (Fertility rate (birth per women).)** Total fertility rate represents the number of children that would be born to a woman if she were to live to the end of her childbearing years and bear children in accordance with age-specific fertility rates of the specified year.
+The "Female Participation in Workforce in World" project focused on studying the disparity between male and female workforce participation across different countries. The objective was to identify the socio-economic factors that influence the percentage of employed women using Multiple Linear Regression (MLR) techniques. The project was implemented using R programming language.
 
-**3. RatioMaletoFemale (Ratio of female to male labor force participation rate.)** Labor force participation rate is the proportion of the population ages 15 and older that is economically active: all people who supply labor for the production of goods and services during a specified period. Ratio of female to male labor force participation rate is calculated by dividing female labor force participation rate by male labor force participation rate and multiplying by 100.
+## Data and Analysis
 
-**4. PerFemEmployers Employers, female (% of female employment).** Employers are those workers who, working on their own account or with one or a few partners, hold the type of jobs defined as a "self-employment jobs" i.e. jobs where the remuneration is directly dependent upon the profits derived from the goods and services produced), and, in this capacity, have engaged, on a continuous basis, one or more persons to work for them as employee(s).
+The project utilized data from the World Bank database, specifically focusing on 11 development indicators related to female employment and other predictor variables across 217 countries for the year 2019. The data was preprocessed to handle missing values and simplify variable names. The MLR model was then built using the selected predictors to analyze the relationship with the percentage of employed women.
 
-**5. Agriculture (Employment in agriculture, female (% of female employment).)** Employment is defined as persons of working age who were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period or not at work due to temporary absence from a job, or to working-time arrangement. The agriculture sector consists of activities in agriculture, hunting, forestry and fishing, in accordance with division 1 (ISIC 2) or categories A-B (ISIC 3) or category A (ISIC 4).
+## Analysis Highlights
 
-**6. Industry (Employment in industry, female (% of female employment).)** The industry sector consists of mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water), in accordance with divisions 2-5 (ISIC 2) or categories C-F (ISIC 3) or categories B-F (ISIC 4).
+The regression analysis revealed the following insights:
 
-**7. Services (Employment in services, female (% of female employment).)** The services sector consists of wholesale and retail trade and restaurants and hotels; transport, storage, and communications; financing, insurance, real estate, and business services; and community, social, and personal services, in accordance with divisions 6-9 (ISIC 2) or categories G-Q (ISIC 3) or categories G-U (ISIC 4).
+- The intercept of the regression model was -6.87, indicating a negative impact on the average percentage of employed women in the given year.
+- The variable "RatioMaletoFemale" showed a positive correlation with the response variable. An increase in the male-to-female labor force participation ratio led to an increase in the percentage of employed women.
+- Another significant predictor was "ContrFamWorkers," which positively influenced the response variable. An increase in the number of contributing family workers in a household increased the chances of female employment.
+- Surprisingly, variables such as "Industry" and "FertilityRate" had a low impact on the response variable.
 
-**8. Wage.Salaried (Wage and salaried workers, female (% of female employment).)** Wage and salaried workers (employees) are those workers who hold the type of jobs defined as "paid employment jobs," where the incumbents hold explicit (written or oral) or implicit employment contracts that give them a basic remuneration that is not directly dependent upon the revenue of the unit for which they work.
+## Conclusion
 
-**9. ContrFamWorkers (Contributing family workers, female (% of female employment).)** Contributing family workers are those workers who hold "self-employment jobs" as own-account workers in a market-oriented establishment operated by a related person living in the same household.
+The project findings suggest that a healthy ratio of male-to-female labor force participation and a higher number of contributing family workers in households positively influence the percentage of employed women. The analysis provides insights into the factors affecting female workforce participation and highlights areas for further research and intervention.
 
-**10. OwnAccount (Own-account female workers (% of employment).)** Own-account workers are workers who, working on their own account or with one or more partners, hold the types of jobs defined as "self-employment jobs" and have not engaged on a continuous basis any employees to work for them. Own account workers are a subcategory of "self-employed".
+## References
 
-**11. Vulnerable (Vulnerable employment, female (% of female employment).)** Vulnerable employment is contributing family workers and own-account workers as a percentage of total employment.
+1. [GenderData.WorldBank](https://genderdata.worldbank.org/data-stories/flfp-data-story/#:~:text=The%20global%20labor%20force%20participation,business%20expansion%20or%20career%20progression)
+2. [OurWorldInData - Female Labor Supply](https://ourworldindata.org/female-labor-supply)
+3. [Kaggle Dataset - Female Employment vs Socioeconomic Factors](https://www.kaggle.com/datasets/mdmuhtasimbillah/female-employment-vs-socioeconimic-factors)
+4. [World Development Indicators - World Bank](https://databank.worldbank.org/source/world-development-indicators/Type/TABLE/preview/on#)
 
-## Purpose
-We can apply Linear Regression Model and other statistical methods on this dataset to analyze if there are any viable relationship between the response of the variables and the predictor.
+For more detailed analysis and findings, please refer to the R Markdown file (`report.rmd`) and the final report (`final_project.pdf`) included in this repository.
+
+For any questions or further information, please contact [Sonal Ganvir] at [sonalgan2000@gmail.com].
