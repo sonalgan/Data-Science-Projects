@@ -1,3 +1,4 @@
+![project_image](https://github.com/sonalgan/Data-Science-Projects/assets/57640393/30ee972e-03bc-440e-8c5e-2d9afc55f95e)
 # Human Activity Recognition using SmartPhones
 
 ![Project Image](project_image.png) <!-- Include an image illustrating your project, if applicable -->
