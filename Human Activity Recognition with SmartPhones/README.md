@@ -1,8 +1,6 @@
-
-# Human Activity Recognition using SmartPhones
-
 ![project_image](https://github.com/sonalgan/Data-Science-Projects/assets/57640393/30ee972e-03bc-440e-8c5e-2d9afc55f95e)
 
+# Human Activity Recognition using SmartPhones
 ## Description
 
 This repository contains the code and documentation for the Human Activity Recognition with SmartPhones project, part of the Data Science Projects repository. The project aims to develop a predictive model that accurately identifies human activities based on data collected from smartphone sensors.
